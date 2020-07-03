@@ -190,44 +190,53 @@ function FormikDialog<RowData extends IData>({
             <form onSubmit={handleSubmit}>
               <DialogContent>
                 {mode !== 'delete' &&
-                  columns.map(column => (
-                    <Field key={column.field} name={column.field}>
-                      {({ field, meta }: FieldAttributes<any>) => {
-                        const errorProps: {
-                          helperText?: string;
-                          error?: boolean;
-                        } = {};
-                        if (column.lookup === undefined) {
-                          errorProps.helperText = meta.error;
-                          errorProps.error = meta.error !== undefined;
-                        }
-                        return (
-                          <div className={classes.field}>
-                            <label htmlFor={column.field as string}>
-                              {column.title}
-                            </label>
-                            <EditCell
-                              {...field}
-                              {...errorProps}
-                              fullWidth={true}
-                              id={column.field}
-                              columnDef={column}
-                              onChange={(newValue: string | number | boolean) =>
-                                field.onChange({
-                                  target: {
-                                    value: newValue,
-                                    checked: newValue,
-                                    name: field.name,
-                                  },
-                                })
-                              }
-                              rowData={data}
-                            />
-                          </div>
-                        );
-                      }}
-                    </Field>
-                  ))}
+                  columns.map(
+                    column =>
+                      (column.editable === undefined ||
+                        column.editable === 'always' ||
+                        (column.editable === 'onAdd' && mode === 'add') ||
+                        (column.editable === 'onUpdate' &&
+                          mode === 'update')) && (
+                        <Field key={column.field} name={column.field}>
+                          {({ field, meta }: FieldAttributes<any>) => {
+                            const errorProps: {
+                              helperText?: string;
+                              error?: boolean;
+                            } = {};
+                            if (column.lookup === undefined) {
+                              errorProps.helperText = meta.error;
+                              errorProps.error = meta.error !== undefined;
+                            }
+                            return (
+                              <div className={classes.field}>
+                                <label htmlFor={column.field as string}>
+                                  {column.title}
+                                </label>
+                                <EditCell
+                                  {...field}
+                                  {...errorProps}
+                                  fullWidth={true}
+                                  id={column.field}
+                                  columnDef={column}
+                                  onChange={(
+                                    newValue: string | number | boolean
+                                  ) =>
+                                    field.onChange({
+                                      target: {
+                                        value: newValue,
+                                        checked: newValue,
+                                        name: field.name,
+                                      },
+                                    })
+                                  }
+                                  rowData={data}
+                                />
+                              </div>
+                            );
+                          }}
+                        </Field>
+                      )
+                  )}
                 {mode === 'delete' && (
                   <DialogContentText>
                     {localization.deleteText}

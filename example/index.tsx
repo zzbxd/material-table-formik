@@ -27,7 +27,7 @@ const App = () => {
         columns={[
           { title: 'Name', field: 'name' },
           { title: 'First Name', field: 'surname' },
-          { title: 'Birth Year', field: 'birthYear', type: 'numeric' },
+          { title: 'Birth Year', field: 'birthYear', type: 'numeric', editable: 'never' },
           {
             title: 'Brith City',
             field: 'birthCity',
