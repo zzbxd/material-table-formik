@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import Table from '../.';
 import * as Yup from 'yup';
+import { Column } from 'material-table';
 
 const AddSchema = Yup.object().shape({
   name: Yup.string()
@@ -16,6 +17,21 @@ const AddSchema = Yup.object().shape({
   birthYear: Yup.number().required('Required'),
 });
 
+const localization = {
+  body: {
+    editRow: {
+      saveTooltip: 'Save',
+      cancelTooltip: 'Cancel',
+      deleteText: 'Are you sure you want to delete this ETL input file?',
+    },
+  },
+};
+
+function disabledFn(columnField: string, mode: string): boolean {
+  if (columnField === 'name') return true;
+  return false;
+}
+
 const App = () => {
   const [data, setData] = React.useState([
     { name: 'Engel', surname: 'Dominik', birthYear: 1994, birthCity: 63 },
@@ -24,10 +40,17 @@ const App = () => {
     <div>
       <Table
         validationSchema={AddSchema}
+        localization={localization}
+        disabledFn={disabledFn}
         columns={[
           { title: 'Name', field: 'name' },
-          { title: 'First Name', field: 'surname' },
-          { title: 'Birth Year', field: 'birthYear', type: 'numeric', editable: 'never' },
+          { title: 'First Name', field: 'surname', hidden: true },
+          {
+            title: 'Birth Year',
+            field: 'birthYear',
+            type: 'numeric',
+            editable: 'never',
+          },
           {
             title: 'Brith City',
             field: 'birthCity',

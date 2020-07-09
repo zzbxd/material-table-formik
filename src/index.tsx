@@ -35,6 +35,10 @@ interface IFormikWrapperProps<RowData extends IData>
   extends MaterialTableProps<RowData> {
   validate?: (value: RowData) => void | object | Promise<FormikErrors<RowData>>;
   validationSchema?: any | (() => any);
+  disabledFn?: (
+    columnField: string,
+    mode: 'add' | 'update' | 'delete'
+  ) => boolean;
   localization?: IWrapperLocalization;
 }
 
@@ -46,7 +50,13 @@ interface IWrapperLocalization extends Localization {
 function FormikWrapper<RowData extends IData>(
   props: IFormikWrapperProps<RowData>
 ) {
-  const { localization, components, validate, validationSchema } = props;
+  const {
+    localization,
+    components,
+    validate,
+    validationSchema,
+    disabledFn,
+  } = props;
 
   const dialogLocalisation = {
     addTooltip:
@@ -77,6 +87,7 @@ function FormikWrapper<RowData extends IData>(
             editField={editField}
             dialogLocalisation={dialogLocalisation}
             validate={validate}
+            disabledFn={disabledFn}
             validationSchema={validationSchema}
           />
         ),
@@ -90,6 +101,10 @@ interface IFormikDialogProps<RowData extends IData> {
   validate?: (
     values: RowData
   ) => void | object | Promise<FormikErrors<RowData>>;
+  disabledFn?: (
+    columnField: string,
+    mode: 'add' | 'update' | 'delete'
+  ) => boolean;
   validationSchema?: any | (() => any);
   dialogLocalisation: {
     addTooltip: string;
@@ -127,6 +142,7 @@ function FormikDialog<RowData extends IData>({
   children,
   onEditingCanceled,
   validate,
+  disabledFn,
   onEditingApproved,
   validationSchema,
   mode,
@@ -218,6 +234,11 @@ function FormikDialog<RowData extends IData>({
                                   fullWidth={true}
                                   id={column.field}
                                   columnDef={column}
+                                  disabled={
+                                    disabledFn
+                                      ? disabledFn(column.field as string, mode)
+                                      : false
+                                  }
                                   onChange={(
                                     newValue: string | number | boolean
                                   ) =>
