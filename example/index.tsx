@@ -28,11 +28,18 @@ const localization = {
 };
 
 function disabledFn(columnField: string, mode: string): boolean {
-  if (columnField === 'name') return true;
+  // if (columnField === 'name') return true;
   return false;
 }
 
 const App = () => {
+  const [canceledState, setCanceledState] = React.useState(0);
+
+  function canceledCallBackFn(): any {
+    setCanceledState(8);
+    alert('canceled State is ' + canceledState);
+  }
+
   const [data, setData] = React.useState([
     { name: 'Engel', surname: 'Dominik', birthYear: 1994, birthCity: 63 },
   ]);
@@ -42,14 +49,14 @@ const App = () => {
         validationSchema={AddSchema}
         localization={localization}
         disabledFn={disabledFn}
+        canceledCallBackFn={canceledCallBackFn}
         columns={[
           { title: 'Name', field: 'name' },
-          { title: 'First Name', field: 'surname', hidden: true },
+          { title: 'First Name', field: 'surname' },
           {
             title: 'Birth Year',
             field: 'birthYear',
             type: 'numeric',
-            editable: 'never',
           },
           {
             title: 'Brith City',

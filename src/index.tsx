@@ -40,6 +40,7 @@ interface IFormikWrapperProps<RowData extends IData>
     mode: 'add' | 'update' | 'delete'
   ) => boolean;
   localization?: IWrapperLocalization;
+  canceledCallBackFn?: () => any;
 }
 
 interface IWrapperLocalization extends Localization {
@@ -56,6 +57,7 @@ function FormikWrapper<RowData extends IData>(
     validate,
     validationSchema,
     disabledFn,
+    canceledCallBackFn,
   } = props;
 
   const dialogLocalisation = {
@@ -88,6 +90,7 @@ function FormikWrapper<RowData extends IData>(
             dialogLocalisation={dialogLocalisation}
             validate={validate}
             disabledFn={disabledFn}
+            canceledCallBackFn={canceledCallBackFn}
             validationSchema={validationSchema}
           />
         ),
@@ -105,6 +108,7 @@ interface IFormikDialogProps<RowData extends IData> {
     columnField: string,
     mode: 'add' | 'update' | 'delete'
   ) => boolean;
+  canceledCallBackFn?: () => any;
   validationSchema?: any | (() => any);
   dialogLocalisation: {
     addTooltip: string;
@@ -143,6 +147,7 @@ function FormikDialog<RowData extends IData>({
   onEditingCanceled,
   validate,
   disabledFn,
+  canceledCallBackFn,
   onEditingApproved,
   validationSchema,
   mode,
@@ -169,6 +174,10 @@ function FormikDialog<RowData extends IData>({
   );
 
   const closeDialog = () => {
+    if (canceledCallBackFn) {
+      var x = canceledCallBackFn();
+      if (x) console.log(x);
+    }
     onEditingCanceled(mode, data);
   };
 
