@@ -37,10 +37,19 @@ interface IFormikWrapperProps<RowData extends IData>
   validationSchema?: any | (() => any);
   disabledFn?: (
     columnField: string,
-    mode: 'add' | 'update' | 'delete'
+    mode: 'add' | 'update' | 'delete',
+    rowValue?: RowData | undefined
   ) => boolean;
   localization?: IWrapperLocalization;
   canceledCallBackFn?: () => any;
+  editColumns?: Column<RowData>[];
+  setHiddenFlagFn?: (
+    fieldName: string,
+    fieldValue: string | number | boolean,
+    currentHideFlag: number
+  ) => number;
+  setInitialHiddenFlagFn?: (rowValue: RowData | undefined) => number;
+  setHiddenConditionFn?: (fieldName: string, hideFlag: number) => boolean;
 }
 
 interface IWrapperLocalization extends Localization {
@@ -58,6 +67,10 @@ function FormikWrapper<RowData extends IData>(
     validationSchema,
     disabledFn,
     canceledCallBackFn,
+    editColumns,
+    setHiddenFlagFn,
+    setInitialHiddenFlagFn,
+    setHiddenConditionFn,
   } = props;
 
   const dialogLocalisation = {
@@ -92,6 +105,10 @@ function FormikWrapper<RowData extends IData>(
             disabledFn={disabledFn}
             canceledCallBackFn={canceledCallBackFn}
             validationSchema={validationSchema}
+            editColumns={editColumns}
+            setHiddenFlagFn={setHiddenFlagFn}
+            setHiddenConditionFn={setHiddenConditionFn}
+            setInitialHiddenFlagFn={setInitialHiddenFlagFn}
           />
         ),
       }}
@@ -106,7 +123,8 @@ interface IFormikDialogProps<RowData extends IData> {
   ) => void | object | Promise<FormikErrors<RowData>>;
   disabledFn?: (
     columnField: string,
-    mode: 'add' | 'update' | 'delete'
+    mode: 'add' | 'update' | 'delete',
+    rowValue?: RowData | undefined
   ) => boolean;
   canceledCallBackFn?: () => any;
   validationSchema?: any | (() => any);
@@ -118,6 +136,14 @@ interface IFormikDialogProps<RowData extends IData> {
   };
   editField: () => React.ReactElement<any>;
   columns: Column<RowData>[];
+  editColumns?: Column<RowData>[];
+  setHiddenFlagFn?: (
+    fieldname: string,
+    fieldvalue: string | number | boolean,
+    currentHideFlag: number
+  ) => number;
+  setInitialHiddenFlagFn?: (rowValue: RowData | undefined) => number;
+  setHiddenConditionFn?: (fieldName: string, hideFlag: number) => boolean;
   data?: RowData;
   components: Components;
   icons: Icons;
@@ -147,6 +173,10 @@ function FormikDialog<RowData extends IData>({
   onEditingCanceled,
   validate,
   disabledFn,
+  editColumns,
+  setHiddenFlagFn,
+  setInitialHiddenFlagFn,
+  setHiddenConditionFn,
   canceledCallBackFn,
   onEditingApproved,
   validationSchema,
@@ -181,6 +211,12 @@ function FormikDialog<RowData extends IData>({
     onEditingCanceled(mode, data);
   };
 
+  const onEnter = () => {
+    if (setInitialHiddenFlagFn) {
+      setHideFlag(setInitialHiddenFlagFn(data));
+    }
+  };
+
   let title;
   switch (mode) {
     case 'add':
@@ -193,9 +229,31 @@ function FormikDialog<RowData extends IData>({
       title = dialogLocalisation.deleteHeader;
       break;
   }
+
+  const [hideFlag, setHideFlag] = React.useState(0);
+
+  const wrapFieldChange = (field: any, newValue: string | number | boolean) => {
+    if (setHiddenFlagFn) {
+      setHideFlag(setHiddenFlagFn(field.name, newValue, hideFlag));
+    }
+
+    field.onChange({
+      target: {
+        value: newValue,
+        checked: newValue,
+        name: field.name,
+      },
+    });
+  };
+
   return (
     <>
-      <Dialog onClose={closeDialog} open={true} fullWidth={true}>
+      <Dialog
+        onClose={closeDialog}
+        open={true}
+        onEnter={onEnter}
+        fullWidth={true}
+      >
         <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
         <Formik
           validationSchema={validationSchema}
@@ -215,13 +273,16 @@ function FormikDialog<RowData extends IData>({
             <form onSubmit={handleSubmit}>
               <DialogContent>
                 {mode !== 'delete' &&
-                  columns.map(
+                  (editColumns ? editColumns : columns).map(
                     column =>
                       (column.editable === undefined ||
                         column.editable === 'always' ||
                         (column.editable === 'onAdd' && mode === 'add') ||
                         (column.editable === 'onUpdate' &&
-                          mode === 'update')) && (
+                          mode === 'update')) &&
+                      (setHiddenConditionFn
+                        ? setHiddenConditionFn(column.field as string, hideFlag)
+                        : true) && (
                         <Field key={column.field} name={column.field}>
                           {({ field, meta }: FieldAttributes<any>) => {
                             const errorProps: {
@@ -245,20 +306,18 @@ function FormikDialog<RowData extends IData>({
                                   columnDef={column}
                                   disabled={
                                     disabledFn
-                                      ? disabledFn(column.field as string, mode)
+                                      ? disabledFn(
+                                          column.field as string,
+                                          mode,
+                                          data
+                                        )
                                       : false
                                   }
                                   onChange={(
                                     newValue: string | number | boolean
-                                  ) =>
-                                    field.onChange({
-                                      target: {
-                                        value: newValue,
-                                        checked: newValue,
-                                        name: field.name,
-                                      },
-                                    })
-                                  }
+                                  ) => {
+                                    wrapFieldChange(field, newValue);
+                                  }}
                                   rowData={data}
                                 />
                               </div>
