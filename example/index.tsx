@@ -28,12 +28,7 @@ const localization = {
 };
 
 // make columnField disabled
-// Add rowValue control
-const disabledFn = (
-  columnField: string,
-  mode: string,
-  rowValue: any | undefined
-): boolean => {
+const disabledFn = (columnField: string, mode: string): boolean => {
   // if (columnField === 'name') return true;
   return false;
 };
@@ -43,12 +38,25 @@ const disabledFn = (
 const setHiddenFlagFn = (
   fieldName: string,
   fieldValue: string | number | boolean,
-  currentHideFlag: number
+  currentHideFlag: number,
+  setFieldValue: (
+    field: string,
+    value: any,
+    shouldValidate?: boolean | undefined
+  ) => void,
+  getFieldProps: any
 ) => {
+  //let o = getFieldProps('birthYear');
+  // console.log(o.value);
+
   if (fieldName === 'birthCity') {
     if (Number(fieldValue) === 34) {
+      setFieldValue('birthYear', 2000, false);
       return 1;
-    } else return 0;
+    } else {
+      setFieldValue('birthYear', 1994, false);
+      return 0;
+    }
   } else {
     return currentHideFlag;
   }
@@ -163,20 +171,3 @@ const App = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
-
-/*
-                                    if (
-                                      field.name === 'birthCity' &&
-                                      newValue === '34'
-                                    ) {
-                                      setHideFlag(1);
-                                    } else {
-                                      setHideFlag(0);
-                                    }
-
-*/
-
-/*
-                      ((column.field as string) !== 'name' ||
-                        hideFlag === 0) && (
-*/

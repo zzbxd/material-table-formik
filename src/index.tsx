@@ -37,8 +37,7 @@ interface IFormikWrapperProps<RowData extends IData>
   validationSchema?: any | (() => any);
   disabledFn?: (
     columnField: string,
-    mode: 'add' | 'update' | 'delete',
-    rowValue?: RowData | undefined
+    mode: 'add' | 'update' | 'delete'
   ) => boolean;
   localization?: IWrapperLocalization;
   canceledCallBackFn?: () => any;
@@ -46,7 +45,13 @@ interface IFormikWrapperProps<RowData extends IData>
   setHiddenFlagFn?: (
     fieldName: string,
     fieldValue: string | number | boolean,
-    currentHideFlag: number
+    currentHideFlag: number,
+    setFieldValue: (
+      field: string,
+      value: any,
+      shouldValidate?: boolean | undefined
+    ) => void,
+    getFieldProps: any
   ) => number;
   setInitialHiddenFlagFn?: (rowValue: RowData | undefined) => number;
   setHiddenConditionFn?: (fieldName: string, hideFlag: number) => boolean;
@@ -123,8 +128,7 @@ interface IFormikDialogProps<RowData extends IData> {
   ) => void | object | Promise<FormikErrors<RowData>>;
   disabledFn?: (
     columnField: string,
-    mode: 'add' | 'update' | 'delete',
-    rowValue?: RowData | undefined
+    mode: 'add' | 'update' | 'delete'
   ) => boolean;
   canceledCallBackFn?: () => any;
   validationSchema?: any | (() => any);
@@ -140,7 +144,13 @@ interface IFormikDialogProps<RowData extends IData> {
   setHiddenFlagFn?: (
     fieldname: string,
     fieldvalue: string | number | boolean,
-    currentHideFlag: number
+    currentHideFlag: number,
+    setFieldValue: (
+      field: string,
+      value: any,
+      shouldValidate?: boolean | undefined
+    ) => void,
+    getFieldProps: any
   ) => number;
   setInitialHiddenFlagFn?: (rowValue: RowData | undefined) => number;
   setHiddenConditionFn?: (fieldName: string, hideFlag: number) => boolean;
@@ -232,9 +242,26 @@ function FormikDialog<RowData extends IData>({
 
   const [hideFlag, setHideFlag] = React.useState(0);
 
-  const wrapFieldChange = (field: any, newValue: string | number | boolean) => {
+  const wrapFieldChange = (
+    field: any,
+    newValue: string | number | boolean,
+    setFieldValue: (
+      field: string,
+      value: any,
+      shouldValidate?: boolean | undefined
+    ) => void,
+    getFieldProps: any
+  ) => {
     if (setHiddenFlagFn) {
-      setHideFlag(setHiddenFlagFn(field.name, newValue, hideFlag));
+      setHideFlag(
+        setHiddenFlagFn(
+          field.name,
+          newValue,
+          hideFlag,
+          setFieldValue,
+          getFieldProps
+        )
+      );
     }
 
     field.onChange({
@@ -269,7 +296,7 @@ function FormikDialog<RowData extends IData>({
             }
           }}
         >
-          {({ isSubmitting, handleSubmit }) => (
+          {({ isSubmitting, handleSubmit, setFieldValue, getFieldProps }) => (
             <form onSubmit={handleSubmit}>
               <DialogContent>
                 {mode !== 'delete' &&
@@ -306,17 +333,18 @@ function FormikDialog<RowData extends IData>({
                                   columnDef={column}
                                   disabled={
                                     disabledFn
-                                      ? disabledFn(
-                                          column.field as string,
-                                          mode,
-                                          data
-                                        )
+                                      ? disabledFn(column.field as string, mode)
                                       : false
                                   }
                                   onChange={(
                                     newValue: string | number | boolean
                                   ) => {
-                                    wrapFieldChange(field, newValue);
+                                    wrapFieldChange(
+                                      field,
+                                      newValue,
+                                      setFieldValue,
+                                      getFieldProps
+                                    );
                                   }}
                                   rowData={data}
                                 />
