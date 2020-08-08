@@ -4,6 +4,13 @@ import * as ReactDOM from 'react-dom';
 import Table from '../.';
 import * as Yup from 'yup';
 import { Column } from 'material-table';
+import DateFnsUtils from '@date-io/date-fns';
+import {
+  MuiPickersUtilsProvider,
+  TimePicker,
+  DatePicker,
+  DateTimePicker,
+} from '@material-ui/pickers';
 
 const AddSchema = Yup.object().shape({
   /*  name: Yup.string()
@@ -97,7 +104,12 @@ const App = () => {
   }
 
   const [data, setData] = React.useState([
-    { name: 'Engel', surname: 'Dominik', birthYear: 1994, birthCity: 34 },
+    {
+      name: 'Engel',
+      surname: 'Dominik',
+      birthYear: '1994-11-01',
+      birthCity: 34,
+    },
   ]);
   return (
     <div>
@@ -115,7 +127,7 @@ const App = () => {
           {
             title: 'Birth Year',
             field: 'birthYear',
-            type: 'numeric',
+            type: 'date',
           },
           {
             title: 'Brith City',
@@ -129,7 +141,25 @@ const App = () => {
           {
             title: 'Birth Year',
             field: 'birthYear',
-            type: 'numeric',
+            type: 'date',
+            editComponent: props => {
+              const [by, setBy] = React.useState(props.rowData.birthYear);
+              const onChangeBirthyear = birthYear => {
+                setBy(birthYear);
+                props.onChange(birthYear);
+              };
+
+              return (
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                  <DatePicker
+                    value={by}
+                    format="MM/dd/yyyy"
+                    onChange={onChangeBirthyear}
+                    fullWidth={true}
+                  />
+                </MuiPickersUtilsProvider>
+              );
+            },
           },
           {
             title: 'Brith City',
