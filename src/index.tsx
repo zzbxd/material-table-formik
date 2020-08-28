@@ -228,6 +228,10 @@ function FormikDialog<RowData extends IData>({
     }
   };
 
+  const onEntered = () => {
+    titleRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   let title;
   switch (mode) {
     case 'add':
@@ -340,15 +344,19 @@ function FormikDialog<RowData extends IData>({
     });
   };
 
+  const titleRef = React.useRef<HTMLTitleElement>(null);
   return (
     <>
       <Dialog
         onClose={closeDialog}
         open={true}
         onEnter={onEnter}
+        onEntered={onEntered}
         fullWidth={true}
       >
-        <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
+        <DialogTitle id="simple-dialog-title" ref={titleRef}>
+          {title}
+        </DialogTitle>
         <Formik
           validationSchema={validationSchema}
           initialValues={initialValues}

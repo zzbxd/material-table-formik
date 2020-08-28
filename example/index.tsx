@@ -11,6 +11,8 @@ import {
   DatePicker,
   DateTimePicker,
 } from '@material-ui/pickers';
+import { CsvBuilder } from "filefy";
+import Moment from 'moment';
 
 const AddSchema = Yup.object().shape({
   /*  name: Yup.string()
@@ -95,6 +97,43 @@ const setHiddenConditionFn = (fieldName: string, hideFlag: number) => {
   }
 };
 
+const CustomExportCsv = (columns, data) => {
+
+  let fileName = "demo";
+  let copyData = JSON.parse(JSON.stringify(data));
+  let exportData = {};
+
+  if (copyData) {
+    exportData = copyData.map((c) => {
+      if (c.tableData) {
+        delete c.tableData;
+      }
+      for (i = 0; i < columns.length; i++) {
+        if (columns[i].hidden === true) {
+          delete c[columns[i].field];
+        }
+      }
+
+      var i;
+      for (i = 0; i < columns.length; i++) {
+        if (columns[i].type === "date") {
+          c[columns[i].field] = Moment(c[columns[i].field]).format("MM/DD/YYYY");
+        }
+      }
+      let v = Object.values(c)
+      return Object.assign([], v)
+    })
+  }
+
+  const builder = new CsvBuilder(fileName + ".csv");
+  builder
+    .setDelimeter(",")
+    .setColumns(columns.map((columnDef) => columnDef.title))
+    .addRows(exportData)
+    .exportFile();
+};
+
+
 const App = () => {
   const [canceledState, setCanceledState] = React.useState(0);
 
@@ -166,9 +205,34 @@ const App = () => {
             field: 'birthCity',
             lookup: { 34: 'Aachen', 63: 'Berlin' },
           },
+          { title: 'a1', field: 'a1' },
+          { title: 'a2', field: 'a1' },
+          { title: 'a3', field: 'a1' },
+          { title: 'a4', field: 'a1' },
+          { title: 'a5', field: 'a1' },
+          { title: 'a6', field: 'a1' },
+          { title: 'a7', field: 'a1' },
+          { title: 'a8', field: 'a1' },
+          { title: 'a9', field: 'a1' },
+          { title: 'a10', field: 'a1' },
+          { title: 'a11', field: 'a1' },
+          { title: 'a12', field: 'a1' },
+          { title: 'a13', field: 'a1' },
+          { title: 'a14', field: 'a1' },
+          { title: 'a15', field: 'a1' },
+          { title: 'a16', field: 'a1' },
+          { title: 'a17', field: 'a1' },
+          { title: 'a18', field: 'a1' },
+          { title: 'a19', field: 'a1' },
+          { title: 'a20', field: 'a1' },
         ]}
         data={data}
         title="Demo Title"
+        options={{
+          exportButton: true,
+          exportAllData: true,
+          exportCsv: CustomExportCsv,
+        }}
         editable={{
           onRowAdd: newData =>
             new Promise((resolve, reject) => {
