@@ -16,11 +16,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import { Formik, Field, FormikErrors, FieldAttributes } from 'formik';
-import {
-  CircularProgress,
-  makeStyles,
-  DialogContentText,
-} from '@material-ui/core';
+import { makeStyles, DialogContentText } from '@material-ui/core';
 
 const useStyles = makeStyles({
   field: {
@@ -228,8 +224,8 @@ function FormikDialog<RowData extends IData>({
     }
   };
 
-  const onEntered = () => {
-    titleRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const onSubmitForm = () => {
+    btnSaveRef.current?.click();
   };
 
   let title;
@@ -344,105 +340,117 @@ function FormikDialog<RowData extends IData>({
     });
   };
 
-  const titleRef = React.useRef<HTMLTitleElement>(null);
+  const btnSaveRef = React.useRef<HTMLButtonElement>(null);
+
   return (
     <>
       <Dialog
         onClose={closeDialog}
         open={true}
         onEnter={onEnter}
-        onEntered={onEntered}
         fullWidth={true}
+        scroll={'paper'}
       >
-        <DialogTitle id="simple-dialog-title" ref={titleRef}>
-          {title}
-        </DialogTitle>
-        <Formik
-          validationSchema={validationSchema}
-          initialValues={initialValues}
-          validate={validate}
-          onSubmit={async (values, { setSubmitting }) => {
-            console.log('called');
-            setSubmitting(true);
-            delete values.tableData;
-            await onEditingApproved(mode, values, data);
-            if (mounted && mounted.current) {
-              setSubmitting(false);
-            }
-          }}
-        >
-          {({
-            isSubmitting,
-            handleSubmit,
-            setValues,
-            setFieldValue,
-            getFieldProps,
-          }) => (
-            <form onSubmit={handleSubmit}>
-              <DialogContent>
-                {mode !== 'delete' &&
-                  (editColumns ? editColumns : columns).map(
-                    column =>
-                      (column.editable === undefined ||
-                        column.editable === 'always' ||
-                        (column.editable === 'onAdd' && mode === 'add') ||
-                        (column.editable === 'onUpdate' &&
-                          mode === 'update')) &&
-                      (setHiddenConditionFn
-                        ? setHiddenConditionFn(column.field as string, hideFlag)
-                        : true) && (
-                        <Field key={column.field} name={column.field}>
-                          {({ field, meta }: FieldAttributes<any>) => {
-                            return (
-                              <div className={classes.field}>
-                                <label htmlFor={column.field as string}>
-                                  {column.title}
-                                </label>
-                                <br />
-                                {getEditCell(
-                                  column,
-                                  field,
-                                  meta,
-                                  setValues,
-                                  setFieldValue,
-                                  getFieldProps
-                                )}
-                              </div>
-                            );
-                          }}
-                        </Field>
-                      )
+        <DialogTitle id="simple-dialog-title">{title}</DialogTitle>
+        <DialogContent>
+          <Formik
+            validationSchema={validationSchema}
+            initialValues={initialValues}
+            validate={validate}
+            onSubmit={async (values, { setSubmitting }) => {
+              console.log('called');
+              setSubmitting(true);
+              delete values.tableData;
+              await onEditingApproved(mode, values, data);
+              if (mounted && mounted.current) {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              isSubmitting,
+              handleSubmit,
+              setValues,
+              setFieldValue,
+              getFieldProps,
+            }) => (
+              <>
+                <form onSubmit={handleSubmit}>
+                  {mode !== 'delete' &&
+                    (editColumns ? editColumns : columns).map(
+                      column =>
+                        (column.editable === undefined ||
+                          column.editable === 'always' ||
+                          (column.editable === 'onAdd' && mode === 'add') ||
+                          (column.editable === 'onUpdate' &&
+                            mode === 'update')) &&
+                        (setHiddenConditionFn
+                          ? setHiddenConditionFn(
+                              column.field as string,
+                              hideFlag
+                            )
+                          : true) && (
+                          <Field key={column.field} name={column.field}>
+                            {({ field, meta }: FieldAttributes<any>) => {
+                              return (
+                                <div className={classes.field}>
+                                  <label htmlFor={column.field as string}>
+                                    {column.title}
+                                  </label>
+                                  <br />
+                                  {getEditCell(
+                                    column,
+                                    field,
+                                    meta,
+                                    setValues,
+                                    setFieldValue,
+                                    getFieldProps
+                                  )}
+                                </div>
+                              );
+                            }}
+                          </Field>
+                        )
+                    )}
+                  {mode === 'delete' && (
+                    <DialogContentText>
+                      {localization.deleteText}
+                    </DialogContentText>
                   )}
-                {mode === 'delete' && (
-                  <DialogContentText>
-                    {localization.deleteText}
-                  </DialogContentText>
-                )}
-                <DialogActions>
-                  {isSubmitting ? (
-                    <CircularProgress size={25} />
-                  ) : (
-                    <>
-                      <Button onClick={closeDialog} color="primary">
-                        {localization.cancelTooltip}
-                      </Button>
-                      <Button
-                        color="primary"
-                        autoFocus={true}
-                        type="submit"
-                        disabled={isSubmitting}
-                      >
-                        {mode !== 'delete'
-                          ? localization.saveTooltip
-                          : dialogLocalisation.deleteAction}
-                      </Button>
-                    </>
-                  )}
-                </DialogActions>
-              </DialogContent>
-            </form>
-          )}
-        </Formik>
+                  <div style={{ display: 'none' }}>
+                    <Button
+                      ref={btnSaveRef}
+                      color="primary"
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {mode !== 'delete'
+                        ? localization.saveTooltip
+                        : dialogLocalisation.deleteAction}
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
+          </Formik>
+        </DialogContent>
+        <DialogActions>
+          <>
+            <Button onClick={closeDialog} color="primary">
+              {localization.cancelTooltip}
+            </Button>
+            <Button
+              color="primary"
+              autoFocus={true}
+              type="submit"
+              onClick={onSubmitForm}
+            >
+              {mode !== 'delete'
+                ? localization.saveTooltip
+                : dialogLocalisation.deleteAction}
+            </Button>
+          </>
+        </DialogActions>
       </Dialog>
       {data && (
         <MTableBodyRow {...props} onToggleDetailPanel={() => {}}>

@@ -11,7 +11,7 @@ import {
   DatePicker,
   DateTimePicker,
 } from '@material-ui/pickers';
-import { CsvBuilder } from "filefy";
+import { CsvBuilder } from 'filefy';
 import Moment from 'moment';
 
 const AddSchema = Yup.object().shape({
@@ -98,13 +98,12 @@ const setHiddenConditionFn = (fieldName: string, hideFlag: number) => {
 };
 
 const CustomExportCsv = (columns, data) => {
-
-  let fileName = "demo";
+  let fileName = 'demo';
   let copyData = JSON.parse(JSON.stringify(data));
   let exportData = {};
 
   if (copyData) {
-    exportData = copyData.map((c) => {
+    exportData = copyData.map(c => {
       if (c.tableData) {
         delete c.tableData;
       }
@@ -116,23 +115,24 @@ const CustomExportCsv = (columns, data) => {
 
       var i;
       for (i = 0; i < columns.length; i++) {
-        if (columns[i].type === "date") {
-          c[columns[i].field] = Moment(c[columns[i].field]).format("MM/DD/YYYY");
+        if (columns[i].type === 'date') {
+          c[columns[i].field] = Moment(c[columns[i].field]).format(
+            'MM/DD/YYYY'
+          );
         }
       }
-      let v = Object.values(c)
-      return Object.assign([], v)
-    })
+      let v = Object.values(c);
+      return Object.assign([], v);
+    });
   }
 
-  const builder = new CsvBuilder(fileName + ".csv");
+  const builder = new CsvBuilder(fileName + '.csv');
   builder
-    .setDelimeter(",")
-    .setColumns(columns.map((columnDef) => columnDef.title))
+    .setDelimeter(',')
+    .setColumns(columns.map(columnDef => columnDef.title))
     .addRows(exportData)
     .exportFile();
 };
-
 
 const App = () => {
   const [canceledState, setCanceledState] = React.useState(0);
@@ -173,6 +173,26 @@ const App = () => {
             field: 'birthCity',
             lookup: { 34: 'Aachen', 63: 'Berlin' },
           },
+          { title: 'a1', field: 'a1' },
+          { title: 'a2', field: 'a2' },
+          { title: 'a3', field: 'a3' },
+          { title: 'a4', field: 'a4' },
+          { title: 'a5', field: 'a5' },
+          { title: 'a6', field: 'a6' },
+          { title: 'a7', field: 'a7' },
+          { title: 'a8', field: 'a8' },
+          { title: 'a9', field: 'a9' },
+          { title: 'a10', field: 'a10' },
+          { title: 'a11', field: 'a11' },
+          { title: 'a12', field: 'a12' },
+          { title: 'a13', field: 'a13' },
+          { title: 'a14', field: 'a14' },
+          { title: 'a15', field: 'a15' },
+          { title: 'a16', field: 'a16' },
+          { title: 'a17', field: 'a17' },
+          { title: 'a18', field: 'a18' },
+          { title: 'a19', field: 'a19' },
+          { title: 'a20', field: 'a20' },
         ]}
         editColumns={[
           { title: 'Name', field: 'name' },
@@ -206,25 +226,25 @@ const App = () => {
             lookup: { 34: 'Aachen', 63: 'Berlin' },
           },
           { title: 'a1', field: 'a1' },
-          { title: 'a2', field: 'a1' },
-          { title: 'a3', field: 'a1' },
-          { title: 'a4', field: 'a1' },
-          { title: 'a5', field: 'a1' },
-          { title: 'a6', field: 'a1' },
-          { title: 'a7', field: 'a1' },
-          { title: 'a8', field: 'a1' },
-          { title: 'a9', field: 'a1' },
-          { title: 'a10', field: 'a1' },
-          { title: 'a11', field: 'a1' },
-          { title: 'a12', field: 'a1' },
-          { title: 'a13', field: 'a1' },
-          { title: 'a14', field: 'a1' },
-          { title: 'a15', field: 'a1' },
-          { title: 'a16', field: 'a1' },
-          { title: 'a17', field: 'a1' },
-          { title: 'a18', field: 'a1' },
-          { title: 'a19', field: 'a1' },
-          { title: 'a20', field: 'a1' },
+          { title: 'a2', field: 'a2' },
+          { title: 'a3', field: 'a3' },
+          { title: 'a4', field: 'a4' },
+          { title: 'a5', field: 'a5' },
+          { title: 'a6', field: 'a6' },
+          { title: 'a7', field: 'a7' },
+          { title: 'a8', field: 'a8' },
+          { title: 'a9', field: 'a9' },
+          { title: 'a10', field: 'a10' },
+          { title: 'a11', field: 'a11' },
+          { title: 'a12', field: 'a12' },
+          { title: 'a13', field: 'a13' },
+          { title: 'a14', field: 'a14' },
+          { title: 'a15', field: 'a15' },
+          { title: 'a16', field: 'a16' },
+          { title: 'a17', field: 'a17' },
+          { title: 'a18', field: 'a18' },
+          { title: 'a19', field: 'a19' },
+          { title: 'a20', field: 'a20' },
         ]}
         data={data}
         title="Demo Title"
