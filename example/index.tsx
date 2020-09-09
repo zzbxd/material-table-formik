@@ -97,39 +97,45 @@ const setHiddenConditionFn = (fieldName: string, hideFlag: number) => {
   }
 };
 
-const CustomExportCsv = (columns, data) => {
-  let fileName = 'demo';
+const CustomExportCsv = (columns: any, data) => {
+  let fileName = 'Demo';
   let copyData = JSON.parse(JSON.stringify(data));
   let exportData = {};
+  let outputColumns: any = [];
 
   if (copyData) {
     exportData = copyData.map(c => {
-      if (c.tableData) {
-        delete c.tableData;
-      }
-      for (i = 0; i < columns.length; i++) {
-        if (columns[i].hidden === true) {
-          delete c[columns[i].field];
-        }
-      }
+      let v: any = [];
 
       var i;
       for (i = 0; i < columns.length; i++) {
-        if (columns[i].type === 'date') {
-          c[columns[i].field] = Moment(c[columns[i].field]).format(
-            'MM/DD/YYYY'
-          );
+        if (columns[i].hidden !== true) {
+          if (columns[i].lookup) {
+            v.push(columns[i].lookup[c[columns[i].field]]);
+          } else {
+            if (columns[i].type === 'date') {
+              v.push(Moment(c[columns[i].field]).format('MM/DD/YYYY'));
+            } else {
+              v.push(c[columns[i].field]);
+            }
+          }
         }
       }
-      let v = Object.values(c);
-      return Object.assign([], v);
+      return v;
     });
+  }
+
+  var i;
+  for (i = 0; i < columns.length; i++) {
+    if (columns[i].hidden !== true) {
+      outputColumns.push(columns[i]);
+    }
   }
 
   const builder = new CsvBuilder(fileName + '.csv');
   builder
     .setDelimeter(',')
-    .setColumns(columns.map(columnDef => columnDef.title))
+    .setColumns(outputColumns.map(columnDef => columnDef.title))
     .addRows(exportData)
     .exportFile();
 };
